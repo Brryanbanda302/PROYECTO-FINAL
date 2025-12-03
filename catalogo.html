@@ -1,86 +1,230 @@
-<!DOCTYPE html>
-<html lang="en">
+document.addEventListener('DOMContentLoaded', () => {
+    const llaveUsuario = 'users'; 
+    const USER_KEY = 'userActivo';
+    const llaveCat = 'productCatalog';
+    const defaultImagePath = "img/disco.png"; 
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="img/icon.png">
-</head>
+    const artistasAdicionales = [
+        "The Vinyl Souls", "Synthwave Collective", "Midnight Echo", "Jazz Quorum", 
+        "Crono", "Nebula Drive", "Acoustic Fire", "Silver Road", "The Time Travellers",
+        "Lírica Urbana", "Pulse Code", "Electro Heart", "The Fading Lights", 
+        "Deep Tide", "Vox Machina", "Ember", "Ghost Writer", "Silent Parade",
+        "Astral Glow", "Sunset Waves", "Urban Rhythm", "The New World"
+    ];
 
-<body>
-   <nav class="navbar navbar-expand-lg bg-black navbar-dark"> 
-            <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <img src="img/logo.jpg" alt="Logo" class="logo me-3 "> 
-            <a class="navbar-brand" href="#"><strong>TIMELESS ECHO</strong></a>
-            <div class="collapse navbar-collapse me-5" id="navbarTogglerDemo03">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> 
-                    <li class="nav-item">
-                    <a class="nav-link" href="index.html"><strong>INICIO</strong></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="perfilLink"><strong>PERFIL</strong></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.html"><strong>INICIAR SESIÓN</strong></a>
-                </li>
-                </ul>
-            </div>
-            </div>
-        </nav>
+    const albumNombres = [
+        "ÁLVARO SOLER - SOFIA", "BESOS, LIMÓN Y MIEL - MARIANA SEOANE FT. JOSÉ EDUARDO",
+        "COINCIDIR - MACACO", "QUERERTE", "ME ENCANTAS DEMASIADO", "SONREÍR - KURT",
+        "NICOLÁS MAYORCA - POR TI", "ZERI - ASÍ TE PEDÍ", "RSEL - SIN PEDIRME PERDÓN",
+        "DUELES - JESSE Y JOY", "TODO DE TI - RAUW ALEJANDRO", "LIVIN' LA VIDA LOCA - RICKY MARTIN",
+        "MATISSE, GUAYNAA - IMPOSIBLE AMOR", "PERRO DE CADENA GRUESA",
+        "ANDRÉS CEPEDA, CALI Y EL DANDEE - TE VOY A AMAR", "TAL VEZ, HE CAMBIADO TANTO...",
+        "IMAGINE DRAGONS - ÁLBUM ORIGEN (DELUXE)", "ANTHRÉS - EL DIABLO USA FALDA",
+        "FLOR DE LOTO - RABELAY FEAT.", "DAAZ, SABINO - MOTEL CALIFORNIA",
+        "PUNTO DE QUIEBRE - D’HUIZAR", "SANTA RM - DEJA VU",
+        "30 DE FEBRERO - HA-ASH FT. ABRAHAM MATEO"
+    ];
+
+    const titulosGenericos = [
+        "EL ECO PERDIDO", "SINFONÍA ESTELAR", "RITMOS DE MEDIANOCHE", "LA COSECHA DEL ALMA", 
+        "SUEÑOS DE VINILO", "TRONO DE CRISTAL", "VIAJE TEMPORAL", "LUZ EN LA NIEBLA", 
+        "MÁQUINA DEL TIEMPO", "LATIDOS DE CIUDAD", "CAMINOS DE SEDA", "LA LEYENDA DEL SOL", 
+        "OCÉANO DE SONIDOS", "FANTASMAS DEL AYER", "EL JARDÍN SECRETO", "FUEGO LENTO",
+        "EL ÚLTIMO VALS", "ESPEJOS ROTOS", "CIELO CARMESÍ", "ECOS DE JAZZ", 
+        "FRONTERA SILENCIOSA", "RELÁMPAGO AZUL", "DANZA CÓSMICA", "EL MAESTRO DE MARIONETAS", 
+        "SOMBRAS Y VIENTO", "AMANECER BOREAL", "GEOMETRÍA LUNAR" 
+    ];
+
+    function initializeDefaultCatalog() {
+        let discos = JSON.parse(localStorage.getItem(llaveCat));
+        if (discos && discos.length > 0) return discos;
+
+        discos = [];
+        for (let i = 0; i < 50; i++) {
+            const precio = (15 + Math.random() * 25).toFixed(2);
+            let nombreCompleto;
+            let artistaNombre;
+
+            if (i < albumNombres.length) {
+                nombreCompleto = albumNombres[i];
+                const parts = nombreCompleto.split(' - ');
+                artistaNombre = parts.length > 1 ? parts[0].trim() : "Varios Artistas";
+            } else {
+                const genericIndex = i - albumNombres.length;
+                artistaNombre = artistasAdicionales[genericIndex % artistasAdicionales.length];
+                nombreCompleto = `${artistaNombre} - ${titulosGenericos[genericIndex % titulosGenericos.length]}`;
+            }
+
+            discos.push({
+                id: i + 1,
+                nombre: nombreCompleto,
+                artista: artistaNombre, 
+                precio: parseFloat(precio),
+                imagen: defaultImagePath 
+            });
+        }
+        
+        localStorage.setItem(llaveCat, JSON.stringify(discos));
+        return discos;
+    }
     
-    <main class="container mt-5">
-        <h2 class="mb-4 text-center"><i class="bi bi-disc-fill"></i><strong>CATÁLOGO DE DISCOS DE VINILO</strong> <i class="bi bi-disc-fill"></i></h2>
+    const discos = initializeDefaultCatalog();
 
-        <div id="catalogo-discos" class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-4">
-            </div>
-    </main>
+    function getProductCatalog() {
+        return discos; 
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
-        crossorigin="anonymous">
-    </script>
+    function retornarProductosDatos(productName, productArtist, userPurchases) {
+        return userPurchases.some(purchase => purchase.name === productName && purchase.artist === productArtist);
+    }
+    
+    function VerificacionDeInicion(verificarSesion) {
+        const discos = getProductCatalog();
+        if (!verificarSesion || !verificarSesion.purchases) return;
 
-    <script src="js/catalago.js"></script>
-</body>
-<footer>
-  <strong>
-  <div class="container text-center">
-  <div class="row align-items-start">
-    <div class="col">
-       <ul>
-       <li><a>SOBRE NOSOTROS</a></li>
-       <li><a>QUIÉNES SOMOS</a></li>
-       <li><a>CALIDAD</a></li>
-        <li><a>CONTACTO</a></li>
-       </ul>
-    </div>
-    <div class="col">
-      <p>&copy; 2025 TIMELESS ECHO<p>
-        <p>CONTACTO: timelessecho@contacto.com</p>
-      <i class="bi bi-facebook fs-3 text-warning"></i>
-      <i class="bi bi-instagram fs-3 text-warning"></i>
-      <i class="bi bi-twitter-x fs-3 text-warning"></i>
-      <i class="bi bi-whatsapp fs-3 text-warning"></i>
-    </div>
-    <div class="col">
-       <ul>
-       <li><a>LEGAL</a></li>
-       <li><a>AVISO DE PRIVACIDAD</a></li>
-       <li><a>TERMINOS Y CONDICIONES</a></li>
-       </ul>
-    </div>
-  </div>
-</div>
-</strong>
-</footer>
+        const compra = document.querySelectorAll('.buy-btn');
+        const userPurchases = verificarSesion.purchases;
 
-</html>
+        compra.forEach(button => {
+            const discoId = parseInt(button.getAttribute('data-disco-id'));
+            const disco = discos.find(d => d.id === discoId);
+
+            if (verificarSesion.isAdmin) {
+                button.disabled = true;
+                button.textContent = 'Solo Ver';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-warning');
+            } else if (disco && retornarProductosDatos(disco.nombre, disco.artista, userPurchases)) {
+                button.disabled = true;
+                button.textContent = 'Comprado';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
+            }
+        });
+    }
+
+    const contenedorCatalago = document.getElementById('catalogo-discos');
+
+    function mostrarCatalago() {
+        if (!contenedorCatalago) return;
+
+        const discos = getProductCatalog();
+        
+        if (discos.length === 0) {
+            contenedorCatalago.innerHTML = '<p class="text-center p-5">No hay discos disponibles en el catálogo.</p>';
+            return;
+        }
+
+        let htmlContent = '';
+        discos.forEach(disco => {
+            htmlContent += `
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="${disco.imagen || defaultImagePath}" class="card-img-top" alt="${disco.nombre}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${disco.nombre}</h5>
+                            <p class="card-text">${disco.artista}</p>
+                            <div class="card-footer mt-auto">
+                                <span class="badge bg-success">$${disco.precio ? disco.precio.toFixed(2) : '0.00'}</span>
+                                <button class="btn btn-primary buy-btn" data-disco-id="${disco.id}">Comprar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        contenedorCatalago.innerHTML = htmlContent;
+    }
+    
+    contenedorCatalago.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('buy-btn')) return;
+
+        const discos = getProductCatalog();
+        const discoId = parseInt(e.target.getAttribute('data-disco-id'));
+        const discoComprado = discos.find(d => d.id === discoId);
+
+        const usuarioEmail = localStorage.getItem(USER_KEY);
+        if (!usuarioEmail) {
+            alert("Debes iniciar sesión para realizar una compra.");
+            window.location.href = 'login.html';
+            return;
+        }
+
+        let usuariosEdicion = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
+        const userIndex = usuariosEdicion.findIndex(user => user.email === usuarioEmail);
+
+        if (userIndex === -1) {
+            alert("Error: Usuario activo no encontrado. Intenta iniciar sesión de nuevo.");
+            localStorage.removeItem(USER_KEY);
+            return;
+        }
+        
+        const verificarSesion = usuariosEdicion[userIndex];
+        
+        if (verificarSesion.isAdmin) {
+            alert("🚫 Los administradores no pueden realizar compras en la tienda.");
+            return; 
+        }
+        
+        if (!verificarSesion.purchases) verificarSesion.purchases = [];
+
+        if (retornarProductosDatos(discoComprado.nombre, discoComprado.artista, verificarSesion.purchases)) {
+            alert(`¡Atención! Ya has comprado "${discoComprado.nombre}".`);
+            return; 
+        }
+
+        const nuevaCompra = {
+            id: discoComprado.id,
+            name: discoComprado.nombre,
+            artist: discoComprado.artista,
+            precio: discoComprado.precio,
+            image: discoComprado.imagen, 
+            date: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
+        };
+
+        verificarSesion.purchases.push(nuevaCompra);
+        usuariosEdicion[userIndex] = verificarSesion;
+        localStorage.setItem(llaveUsuario, JSON.stringify(usuariosEdicion));
+        
+        alert(`¡Compra exitosa! Has comprado "${discoComprado.nombre}" por $${discoComprado.precio.toFixed(2)}.`);
+        
+        e.target.disabled = true;
+        e.target.textContent = 'Comprado';
+        e.target.classList.remove('btn-primary');
+        e.target.classList.add('btn-secondary');
+    });
+
+    const perfilLink = document.getElementById('perfilLink');
+    if (perfilLink) {
+        perfilLink.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const usuarioEmail = localStorage.getItem(USER_KEY);
+            if (!usuarioEmail) {
+                alert('Debes iniciar sesión para acceder a tu perfil.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const usuariosEdicion = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
+            const verificarSesion = usuariosEdicion.find(user => user.email === usuarioEmail);
+
+            if (verificarSesion) {
+                window.location.href = verificarSesion.isAdmin ? 'admin.html' : 'user.html';
+            } else {
+                alert('Error al cargar datos de perfil. Intenta iniciar sesión de nuevo.');
+                localStorage.removeItem(USER_KEY);
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+    mostrarCatalago();
+
+    const usuarioEmail = localStorage.getItem(USER_KEY);
+    if (usuarioEmail) {
+        const usuariosEdicion = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
+        const verificarSesion = usuariosEdicion.find(user => user.email === usuarioEmail);
+        VerificacionDeInicion(verificarSesion);
+    }
+});

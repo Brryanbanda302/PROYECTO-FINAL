@@ -1,5 +1,5 @@
-const signUpForm = document.querySelector('#signUpForm')
-signUpForm.addEventListener('submit', (e) => {
+const iniciarForm = document.querySelector('#iniciarForm')
+iniciarForm.addEventListener('submit', (e) => {
     e.preventDefault()
     const name = document.querySelector('#name').value
     const email = document.querySelector('#email').value
@@ -12,10 +12,10 @@ signUpForm.addEventListener('submit', (e) => {
     }
 
     
-    const newUserId = Users.length > 0 ? Math.max(...Users.map(u => u.id || 0)) + 1 : 1; 
+    const nuevoUserId = Users.length > 0 ? Math.max(...Users.map(u => u.id || 0)) + 1 : 1; 
 
-    const newUser = { 
-        id: newUserId,
+    const nuevoUser = { 
+        id: nuevoUserId,
         name: name, 
         email: email, 
         password: password,
@@ -23,7 +23,7 @@ signUpForm.addEventListener('submit', (e) => {
         purchases: []         
     };
 
-    Users.push(newUser);
+    Users.push(nuevoUser);
     localStorage.setItem('users', JSON.stringify(Users))
     alert('Registro Exitoso!')
     window.location.href = 'login.html'

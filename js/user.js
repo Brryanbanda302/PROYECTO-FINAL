@@ -1,32 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    const userKey = 'activeUserEmail'; 
-    const USER_KEY = 'users'; 
+    const idUsuario = 'userActivo'; 
+    const llaveUsuario = 'users'; 
     
-    let currentUserEmail = localStorage.getItem(userKey);
+    let verificarSesionEmail = localStorage.getItem(idUsuario);
     
-    if (!currentUserEmail) {
+    if (!verificarSesionEmail) {
         alert("Debes iniciar sesión para acceder a esta página.");
         window.location.href = 'login.html';
         return;
     }
     
-    let allUsers = JSON.parse(localStorage.getItem(USER_KEY)) || [];
-    let currentUser = allUsers.find(user => user.email === currentUserEmail);
+    let usuariosEdicion = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
+    let verificarSesion = usuariosEdicion.find(user => user.email === verificarSesionEmail);
 
-    if (!currentUser) {
+    if (!verificarSesion) {
         alert("Error: Usuario activo no encontrado. Redirigiendo a login.");
-        localStorage.removeItem(userKey);
+        localStorage.removeItem(idUsuario);
         window.location.href = 'login.html';
         return;
     }
 
     function saveUsers() {
-        const userIndex = allUsers.findIndex(user => user.email === currentUser.email);
+        const userIndex = usuariosEdicion.findIndex(user => user.email === verificarSesion.email);
 
         if (userIndex !== -1) {
-            allUsers[userIndex] = currentUser;
-            localStorage.setItem(USER_KEY, JSON.stringify(allUsers));
+            usuariosEdicion[userIndex] = verificarSesion;
+            localStorage.setItem(llaveUsuario, JSON.stringify(usuariosEdicion));
         } else {
             console.error("Error al guardar: Usuario no encontrado en el array global.");
         }
@@ -36,15 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const profileName = document.getElementById('profile-name');
         const profileEmail = document.getElementById('profile-email');
 
-        if (profileName) profileName.textContent = currentUser.name;
-        if (profileEmail) profileEmail.textContent = currentUser.email;
+        if (profileName) profileName.textContent = verificarSesion.name;
+        if (profileEmail) profileEmail.textContent = verificarSesion.email;
     }
 
     function loadPurchaseHistory() {
         const historyList = document.getElementById('purchaseHistoryList');
         if (!historyList) return; 
 
-        const purchases = currentUser.purchases || []; 
+        const purchases = verificarSesion.purchases || []; 
         
         if (purchases.length === 0) {
             historyList.innerHTML = `<p class="text-muted">Aún no tienes compras registradas.</p>`;
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <br><small class="text-muted">Comprado el: ${item.date}</small>
                         </div>
                         
-                        <span class="badge bg-primary rounded-pill me-2">$${item.price.toFixed(2)}</span>
+                        <span class="badge bg-primary rounded-pill me-2">$${item.precio.toFixed(2)}</span>
                         
                         <button class="btn btn-danger btn-sm delete-purchase-btn" data-index="${idx}" aria-label="Eliminar compra">
                             <i class="bi bi-trash"></i> 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        currentUser.purchases.splice(index, 1);
+        verificarSesion.purchases.splice(index, 1);
         
         saveUsers();
         loadPurchaseHistory();
@@ -124,12 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const newName = document.getElementById('newName').value;
             
-            if (newName === currentUser.name) {
+            if (newName === verificarSesion.name) {
                 alert("El nuevo nombre es el mismo que el actual.");
                 return;
             }
 
-            currentUser.name = newName; 
+            verificarSesion.name = newName; 
             saveUsers(); 
             updateProfileDisplay();
             alert("Nombre actualizado con éxito.");
@@ -144,25 +144,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const newEmail = document.getElementById('newEmail').value;
             const passwordConfirm = document.getElementById('emailPasswordConfirm').value;
 
-            if (passwordConfirm !== currentUser.password) {
+            if (passwordConfirm !== verificarSesion.password) {
                 alert("Contraseña actual incorrecta.");
                 return;
             }
             
-            if (newEmail === currentUser.email) {
+            if (newEmail === verificarSesion.email) {
                 alert("El nuevo correo es el mismo que el actual.");
                 return;
             }
 
-            const emailExists = allUsers.some(user => user.email === newEmail && user.email !== currentUserEmail);
+            const emailExists = usuariosEdicion.some(user => user.email === newEmail && user.email !== verificarSesionEmail);
             if (emailExists) {
                 alert("Este correo ya está registrado por otra cuenta.");
                 return;
             }
 
-            currentUser.email = newEmail;
-            localStorage.setItem(userKey, newEmail); 
-            currentUserEmail = newEmail; 
+            verificarSesion.email = newEmail;
+            localStorage.setItem(idUsuario, newEmail); 
+            verificarSesionEmail = newEmail; 
             
             saveUsers();
             updateProfileDisplay();
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const oldPassword = document.getElementById('oldPassword').value;
             const newPassword = document.getElementById('newPassword').value;
 
-            if (oldPassword !== currentUser.password) {
+            if (oldPassword !== verificarSesion.password) {
                 alert("La contraseña anterior es incorrecta.");
                 return;
             }
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            currentUser.password = newPassword;
+            verificarSesion.password = newPassword;
             saveUsers(); 
             alert("Contraseña cambiada con éxito.");
             formEditPassword.reset();
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem(userKey);
+            localStorage.removeItem(idUsuario);
             alert("Sesión cerrada. Serás redirigido al inicio de sesión.");
             window.location.href = 'login.html';
         });

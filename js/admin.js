@@ -1,49 +1,68 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-   const USER_KEY = 'users'; 
-    const ACTIVE_USER_KEY = 'activeUserEmail';
-    const CATALOG_KEY = 'productCatalog';
+    const llaveUsuario = 'users'; 
+    const userActivo = 'userActivo';
+    const llaveCat = 'productCatalog';
 
-    
-    const currentUserEmail = localStorage.getItem(ACTIVE_USER_KEY);
-    let allUsers = JSON.parse(localStorage.getItem(USER_KEY)) || [];
-    const currentUser = allUsers.find(user => user.email === currentUserEmail);
+    // ==============================
+    // 👑 ADMIN PREDEFINIDO
+    // ==============================
+    (function defultAdmin() {
+        let adminDefecto = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
 
-    
-    if (!currentUserEmail || !currentUser) {
+        const defaultAdmin = {
+            id: 1,
+            name: "Admin",
+            email: "admin@vinilos.com",
+            password: "admin123",
+            isAdmin: true,
+            purchases: []
+        };
+
+        const adminExistente = adminDefecto.some(user => user.email === defaultAdmin.email);
+
+        if (!adminExistente) {
+            adminDefecto.push(defaultAdmin);
+            localStorage.setItem(llaveUsuario, JSON.stringify(adminDefecto));
+            console.log("Administrador por defecto añadido.");
+        }
+    })();
+
+    const verificarSesionEmail = localStorage.getItem(userActivo);
+    let usuariosEdicion = JSON.parse(localStorage.getItem(llaveUsuario)) || [];
+    const verificarSesion = usuariosEdicion.find(user => user.email === verificarSesionEmail);
+
+    if (!verificarSesionEmail || !verificarSesion) {
         alert("No hay sesión activa o el usuario no existe. Serás redirigido al inicio de sesión.");
-        localStorage.removeItem(ACTIVE_USER_KEY);
+        localStorage.removeItem(userActivo);
         window.location.href = 'login.html';
         return;
     }
 
-    
-    if (!currentUser.isAdmin) {
+    if (!verificarSesion.isAdmin) {
         alert("Acceso denegado. Serás redirigido al inicio de sesión.");
-        localStorage.removeItem(ACTIVE_USER_KEY);
+        localStorage.removeItem(userActivo);
         window.location.href = 'login.html';
         return;
     }
 
-    
-    function saveUsers() {
-        const userIndex = allUsers.findIndex(user => user.email === currentUser.email);
+    function GuardarUsuario() {
+        const userIndex = usuariosEdicion.findIndex(user => user.email === verificarSesion.email);
         if (userIndex !== -1) {
-            allUsers[userIndex] = currentUser;
-            localStorage.setItem(USER_KEY, JSON.stringify(allUsers));
+            usuariosEdicion[userIndex] = verificarSesion;
+            localStorage.setItem(llaveUsuario, JSON.stringify(usuariosEdicion));
         }
     }
 
-    function saveAllUsers() {
-        localStorage.setItem(USER_KEY, JSON.stringify(allUsers));
+    function edicionUsuarioG() {
+        localStorage.setItem(llaveUsuario, JSON.stringify(usuariosEdicion));
     }
-    
 
-    function renderProfile() {
-        const adminNameEl = document.getElementById('admin-name');
-        const adminEmailEl = document.getElementById('admin-email');
-        if (adminNameEl) adminNameEl.textContent = currentUser.name;
-        if (adminEmailEl) adminEmailEl.textContent = currentUser.email;
+    function renderidMuestraPanel() {
+        const mostrarNombreAd = document.getElementById('admin-name');
+        const mostrarCorreoAd = document.getElementById('admin-email');
+        if (mostrarNombreAd) mostrarNombreAd.textContent = verificarSesion.name;
+        if (mostrarCorreoAd) mostrarCorreoAd.textContent = verificarSesion.email;
     }
 
     const navButtons = document.querySelectorAll('.list-group-item-action');
@@ -51,13 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navButtons.forEach(button => {
         button.addEventListener('click', (e) => {
-            const targetSectionId = e.target.getAttribute('data-section');
+            const idMuestraD = e.target.getAttribute('data-section');
 
             navButtons.forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
 
             contentSections.forEach(section => {
-                if (section.id === targetSectionId) {
+                if (section.id === idMuestraD) {
                     section.classList.remove('hidden');
                     section.style.display = 'block';
                 } else {
@@ -66,25 +85,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            
-            if (targetSectionId === 'product-management') {
-                loadProducts();
-            } else if (targetSectionId === 'admin-management') {
-                loadAdmins();
+            if (idMuestraD === 'product-management') {
+                cargarProductos();
+            } else if (idMuestraD === 'admin-management') {
+                mostrarAdmins();
             }
         });
     });
 
-
-    const defaultSection = document.getElementById('profile');
-    if (defaultSection) {
-        defaultSection.style.display = 'block';
-        defaultSection.classList.remove('hidden');
-        
-        const defaultNavButton = document.querySelector('.list-group-item-action[data-section="profile"]');
+    const seccionDef = document.getElementById('idMuestraPanel');
+    if (seccionDef) {
+        seccionDef.style.display = 'block';
+        seccionDef.classList.remove('hidden');
+        const defaultNavButton = document.querySelector('.list-group-item-action[data-section="idMuestraPanel"]');
         if (defaultNavButton) defaultNavButton.classList.add('active');
     }
-
 
     const editFormContainers = document.querySelectorAll('.edit-form-container');
     document.querySelectorAll('.edit-btn').forEach(btn => {
@@ -103,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const newName = document.getElementById('newAdminName').value;
         if (newName) {
-            currentUser.name = newName;
-            saveUsers();
-            renderProfile();
+            verificarSesion.name = newName;
+            GuardarUsuario();
+            renderidMuestraPanel();
             alert("Nombre actualizado con éxito.");
             document.getElementById('form-edit-admin-name').classList.add('hidden');
         }
@@ -116,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldPassword = document.getElementById('oldAdminPassword').value;
         const newPassword = document.getElementById('newAdminPassword').value;
 
-        if (oldPassword !== currentUser.password) {
+        if (oldPassword !== verificarSesion.password) {
             alert("Contraseña anterior incorrecta.");
             return;
         }
@@ -126,25 +141,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        currentUser.password = newPassword;
-        saveUsers();
+        verificarSesion.password = newPassword;
+        GuardarUsuario();
         alert("Contraseña cambiada con éxito.");
         document.getElementById('admin-password-form').reset();
         document.getElementById('form-edit-admin-password').classList.add('hidden');
     });
 
-    
-    function loadProducts() {
-        const productList = document.getElementById('productList');
-        let products = JSON.parse(localStorage.getItem(CATALOG_KEY)) || [];
+    function cargarProductos() {
+        const listaProductos = document.getElementById('listaProductos');
+        let productos = JSON.parse(localStorage.getItem(llaveCat)) || [];
         
-        if (products.length === 0) {
-            productList.innerHTML = `<p class="text-muted p-2">No hay productos en el catálogo.</p>`;
+        if (productos.length === 0) {
+            listaProductos.innerHTML = `<p class="text-muted p-2">No hay productos en el catálogo.</p>`;
             return;
         }
 
         let html = '';
-        products.forEach(p => {
+        productos.forEach(p => {
             html += `<li class="list-group-item list-group-item-product">
                         <div>
                             <strong>${p.nombre}</strong> <span class="text-muted">(${p.artista})</span>
@@ -155,101 +169,99 @@ document.addEventListener('DOMContentLoaded', () => {
                         </button>
                     </li>`;
         });
-        productList.innerHTML = html;
-        attachProductDeleteListeners();
+        listaProductos.innerHTML = html;
+        escuhadorEliminarProd();
     }
 
-    function addProduct(name, artist, price) {
-        let products = JSON.parse(localStorage.getItem(CATALOG_KEY)) || [];
-
-        const newId = products.length > 0 ? Math.max(...products.map(p => p.id || 0)) + 1 : 1; 
+    function agragarProd(name, artist, precio) {
+        let productos = JSON.parse(localStorage.getItem(llaveCat)) || [];
+        const nuevoIdProd = productos.length > 0 ? Math.max(...productos.map(p => p.id || 0)) + 1 : 1; 
         
-        const newProduct = {
-            id: newId,
+        const nuevoProducto = {
+            id: nuevoIdProd,
             nombre: name,
             artista: artist,
-            precio: parseFloat(price),
+            precio: parseFloat(precio),
             imagen: "img/disco.png" 
         };
         
-        products.push(newProduct);
-        localStorage.setItem(CATALOG_KEY, JSON.stringify(products));
-        loadProducts();
+        productos.push(nuevoProducto);
+        localStorage.setItem(llaveCat, JSON.stringify(productos));
+        cargarProductos();
         alert(`Producto "${name}" añadido.`);
     }
 
-    function deleteProduct(id) {
+    function eliminarProd(id) {
         if (!confirm("¿Está seguro de que desea eliminar este producto del catálogo?")) return;
         
-        let products = JSON.parse(localStorage.getItem(CATALOG_KEY)) || [];
-        products = products.filter(p => p.id !== id);
-        localStorage.setItem(CATALOG_KEY, JSON.stringify(products));
-        loadProducts();
+        let productos = JSON.parse(localStorage.getItem(llaveCat)) || [];
+        productos = productos.filter(p => p.id !== id);
+        localStorage.setItem(llaveCat, JSON.stringify(productos));
+        cargarProductos();
         alert("Producto eliminado del catálogo.");
     }
 
-    function attachProductDeleteListeners() {
+    function escuhadorEliminarProd() {
         document.querySelectorAll('.delete-product-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const idToDelete = parseInt(e.currentTarget.getAttribute('data-id'));
-                deleteProduct(idToDelete);
+                eliminarProd(idToDelete);
             });
         });
     }
 
-    document.getElementById('add-product-form').addEventListener('submit', (e) => {
+    document.getElementById('agregarProdForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('productName').value;
         const artist = document.getElementById('productArtist').value;
-        const price = document.getElementById('productPrice').value;
+        const precio = document.getElementById('productprecio').value;
 
-        if (name && artist && !isNaN(price) && parseFloat(price) > 0) {
-            addProduct(name, artist, price);
-            document.getElementById('add-product-form').reset();
+        if (name && artist && !isNaN(precio) && parseFloat(precio) > 0) {
+            agragarProd(name, artist, precio);
+            document.getElementById('agregarProdForm').reset();
         } else {
             alert("Por favor, complete todos los campos correctamente.");
         }
     });
     
-    function loadAdmins() {
-        const adminList = document.getElementById('adminList');
-        const admins = allUsers.filter(user => user.isAdmin);
+    function mostrarAdmins() {
+        const adminLista = document.getElementById('adminLista');
+        const admins = usuariosEdicion.filter(user => user.isAdmin);
 
         if (admins.length === 0) {
-            adminList.innerHTML = `<p class="text-danger p-2">¡ATENCIÓN! No hay administradores activos.</p>`;
+            adminLista.innerHTML = `<p class="text-danger p-2">¡ATENCIÓN! No hay administradores activos.</p>`;
             return;
         }
 
         let html = '';
         admins.forEach(a => {
-            const isCurrentUser = a.email === currentUserEmail;
-            html += `<li class="list-group-item list-group-item-product ${isCurrentUser ? 'list-group-item-warning' : ''}">
+            const verificarSesion = a.email === verificarSesionEmail;
+            html += `<li class="list-group-item list-group-item-product ${verificarSesion ? 'list-group-item-warning' : ''}">
                         <div>
                             <strong>${a.name}</strong> 
                             <span class="text-muted">(${a.email})</span>
-                            ${isCurrentUser ? ' <span class="badge bg-dark">Tú</span>' : ''}
+                            ${verificarSesion ? ' <span class="badge bg-dark">Tú</span>' : ''}
                         </div>
-                        <button class="btn btn-danger btn-sm delete-admin-btn" data-email="${a.email}" ${isCurrentUser ? 'disabled' : ''} aria-label="Eliminar administrador">
+                        <button class="btn btn-danger btn-sm delete-admin-btn" data-email="${a.email}" ${verificarSesion ? 'disabled' : ''} aria-label="Eliminar administrador">
                             <i class="bi bi-person-slash"></i>
                         </button>
                     </li>`;
         });
-        adminList.innerHTML = html;
-        attachAdminDeleteListeners();
+        adminLista.innerHTML = html;
+        escuchadorDeborraradmin();
     }
 
-    function addAdmin(name, email, password) {
-        const emailExists = allUsers.some(user => user.email === email);
+    function agregarAdmin(name, email, password) {
+        const emailExists = usuariosEdicion.some(user => user.email === email);
         if (emailExists) {
             alert("Este correo ya está registrado como usuario o administrador.");
             return;
         }
-        
 
-        const newId = allUsers.length > 0 ? Math.max(...allUsers.map(u => u.id || 0)) + 1 : 1; 
+        const nuevoIdProd = usuariosEdicion.length > 0 ? Math.max(...usuariosEdicion.map(u => u.id || 0)) + 1 : 1; 
 
         const newAdmin = {
-            id: newId,
+            id: nuevoIdProd,
             name: name,
             email: email,
             password: password,
@@ -257,31 +269,30 @@ document.addEventListener('DOMContentLoaded', () => {
             purchases: []
         };
         
-        allUsers.push(newAdmin);
-        saveAllUsers();
-        loadAdmins();
+        usuariosEdicion.push(newAdmin);
+        edicionUsuarioG();
+        mostrarAdmins();
         alert(`Administrador "${name}" añadido.`);
     }
 
-    function deleteAdmin(email) {
-        if (email === currentUserEmail) {
+    function borrarAdmin(email) {
+        if (email === verificarSesionEmail) {
             alert("No puedes eliminar tu propia cuenta de administrador.");
             return;
         }
         if (!confirm(`¿Está seguro de que desea eliminar al administrador con correo: ${email}?`)) return;
 
-
-        allUsers = allUsers.filter(user => user.email !== email);
-        saveAllUsers();
-        loadAdmins();
+        usuariosEdicion = usuariosEdicion.filter(user => user.email !== email);
+        edicionUsuarioG();
+        mostrarAdmins();
         alert("Administrador eliminado.");
     }
 
-    function attachAdminDeleteListeners() {
+    function escuchadorDeborraradmin() {
         document.querySelectorAll('.delete-admin-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const emailToDelete = e.currentTarget.getAttribute('data-email');
-                deleteAdmin(emailToDelete);
+                borrarAdmin(emailToDelete);
             });
         });
     }
@@ -293,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('adminNewPassword').value;
 
         if (name && email && password) {
-            addAdmin(name, email, password);
+            agregarAdmin(name, email, password);
             document.getElementById('add-admin-form').reset();
         } else {
             alert("Por favor, complete todos los campos para el nuevo administrador.");
@@ -301,12 +312,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem(ACTIVE_USER_KEY);
+        localStorage.removeItem(userActivo);
         alert("Sesión cerrada. Serás redirigido al inicio de sesión.");
         window.location.href = 'login.html';
     });
 
-    renderProfile();
-    loadProducts(); 
-    loadAdmins(); 
+    renderidMuestraPanel();
+    cargarProductos(); 
+    mostrarAdmins(); 
 });
